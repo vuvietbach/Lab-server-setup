@@ -1,0 +1,79 @@
+version: '3'
+
+services:
+  slurmjupyter:
+    build:
+      context: ./
+      dockerfile: Dockerfile_jupyter
+    hostname: slurmjupyter
+    user: admin
+    shm_size: '64gb'
+    volumes:
+    - shared-vol:/home/admin
+    ports:
+    - 8888:8888
+    - 45678:22
+    restart: always
+    devices:
+      - '/dev/nvidia0'  # Specify the GPU device
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: ['gpu']
+    command: >
+      bash -c "sudo sed -i 's/#\?PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config
+              && mkdir -p /home/admin/.ssh
+              && touch /home/admin/.ssh/authorized_keys
+              && cp /home/aiotlab/.ssh/authorized_keys /home/admin/.ssh/authorized_keys
+              && sudo chown admin:admin /home/admin/.ssh/authorized_keys
+              && sudo service ssh start"
+  slurmmaster:
+    build:
+      context: ./
+      dockerfile: Dockerfile_master
+    hostname: slurmmaster
+    user: admin
+    shm_size: '64gb'
+    volumes:
+    - shared-vol:/home/admin
+    ports:
+    - 6817:6817
+    - 6818:6818
+    - 6819:6819
+    restart: always
+  #first node
+  slurmnode1:
+    build:
+      context: ./
+      dockerfile: Dockerfile_node
+    hostname: slurmnode1
+    user: admin
+    shm_size: '64gb'
+    volumes:
+    - shared-vol:/home/admin
+    restart: always
+    environment:
+    - SLURM_NODENAME=slurmnode1
+    links:
+    - slurmmaster
+    devices:
+    - '/dev/nvidia0'  
+    - '/dev/nvidia1'  
+    - '/dev/nvidia2'  
+    - '/dev/nvidia3'  
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: ['gpu']
+volumes:
+  shared-vol:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /mnt/disk4/docker_shared_volume
+
