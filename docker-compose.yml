@@ -66,9 +66,10 @@ services:
               capabilities: ['gpu']
 volumes:
   shared-vol:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: /mnt/disk4/docker_shared_volume
+    external: true
+    # driver: local
+    # driver_opts:
+    #   type: none
+    #   o: bind
+    #   device: /mnt/disk4/docker_shared_volume
 
