@@ -27,4 +27,19 @@ RUN sudo chmod +x /etc/slurm-llnl/docker-entrypoint.sh
 # RUN sudo chown admin:admin /home/admin/.ssh/authorized_keys
 # RUN sudo service ssh start
 
+#install conda
+ENV CONDA_HOME /home/admin/miniconda3
+ENV PATH $CONDA_HOME/bin:$PATH
+RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh && \
+    /bin/bash miniconda.sh -b -p $CONDA_HOME && \
+    rm miniconda.sh && \
+    echo "export PATH=$CONDA_HOME/bin:$PATH" >> ~/.bashrc
+
+# Activate the base environment by default
+CMD [ "/bin/bash", "-c", "source $CONDA_HOME/etc/profile.d/conda.sh && conda activate base && /bin/bash" ]
+
+#install pytorch
+#COPY ./pytorch.yml /home/admin/pytorch.yml
+#RUN conda env create -f /home/admin/pytorch.yml
+
 
