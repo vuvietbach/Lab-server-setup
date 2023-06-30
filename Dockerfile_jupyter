@@ -20,9 +20,20 @@ COPY file_init_jupyter.sh /etc/slurm-llnl/docker-entrypoint.sh
 RUN sudo chmod +x /etc/slurm-llnl/docker-entrypoint.sh
 
 # install conda
-ENV PATH="/root/miniconda3/bin:$PATH"
-RUN cd /home/admin && wget -q https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh && bash Miniconda3-latest-Linux-x86_64.sh -b && rm -f Miniconda3-latest-Linux-x86_64.sh && conda init && conda config --set auto_activate_base false && conda update -n base -c defaults conda -y
-RUN conda init
+# Download and install Miniconda
+RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
+RUN bash miniconda.sh -b -p /home/admin/miniconda
+RUN rm miniconda.sh
+
+# Add conda to the PATH environment variable
+ENV PATH="/home/admin/miniconda/bin:${PATH}"
+
+# Set the default conda channels
+RUN conda config --add channels conda-forge
+RUN conda config --add channels defaults
+
+# Update conda
+RUN conda update --all -y
 
 # service ssh start
 # RUN sudo sed -i 's/#\?PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config

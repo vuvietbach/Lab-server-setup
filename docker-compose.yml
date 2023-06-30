@@ -62,14 +62,13 @@ services:
         reservations:
           devices:
             - driver: nvidia
-              device_ids: ['0', '1', '2', '3']
+              device_ids: ['0', '1']
               capabilities: ['gpu']
 volumes:
   shared-vol:
-    external: true
-    # driver: local
-    # driver_opts:
-    #   type: none
-    #   o: bind
-    #   device: /mnt/disk4/docker_shared_volume
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /media/aiotlab3/27934be5-a11a-44ba-8b28-750d135bc3b3/docker_shared_vol
 
